@@ -1,0 +1,66 @@
+<%- include('partials/head', { title: tpl.ad + ' — Belge Yönetimi' }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <div class="flex-between" style="margin-bottom:14px">
+    <a href="/belge-yonetimi" class="btn btn-sm btn-outline">← Belge Yönetimi</a>
+    <a href="/belge-yonetimi/<%= tpl.id %>/test" class="btn btn-sm">🧪 Test Doldur ve İndir</a>
+  </div>
+
+  <h1 class="page-title"><%= tpl.ad %></h1>
+  <p class="page-sub"><%= tpl.tur %> — Yüklenme: <%= (tpl.created_at || '').slice(0, 10) %></p>
+
+  <% if (err) { %><div class="alert alert-error"><%= err %></div><% } %>
+  <% if (msg) { %><div class="alert alert-success"><%= msg %></div><% } %>
+
+  <div class="card">
+    <h3 style="margin-top:0">Öğrencinin Göreceği Form Alanları</h3>
+    <% if (fields === null) { %>
+      <div class="alert alert-error">⚠️ Şablon dosyası okunamıyor (silinmiş veya bozuk olabilir). Aşağıdan yeni dosya yükleyin.</div>
+    <% } else if (!fields.length) { %>
+      <div class="alert alert-info">Bu belgede hiç [[Alan Adı]] işareti yok.</div>
+    <% } else { %>
+      <p class="muted" style="font-size:13px">Öğrenci bu <%= fields.length %> alanı doldurur; aynı adlı işaretler tek alan olarak sorulur ve belgede geçtiği her yere yazılır.</p>
+      <ol style="margin:0;padding-left:22px">
+        <% fields.forEach(function (f) { %>
+          <li style="padding:3px 0"><%= f %></li>
+        <% }); %>
+      </ol>
+    <% } %>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Güncelle</h3>
+    <p class="muted" style="font-size:13px">Adı/türü değiştirebilir, belgenin yeni sürümünü yükleyebilirsiniz. Dosya seçmezseniz mevcut dosya korunur.</p>
+    <form method="POST" action="/belge-yonetimi/<%= tpl.id %>/guncelle" enctype="multipart/form-data">
+      <div class="form-row" style="display:flex;gap:12px;flex-wrap:wrap">
+        <div class="form-group" style="flex:1;min-width:200px">
+          <label for="g-tur">Hareketlilik Türü</label>
+          <select id="g-tur" name="tur" required>
+            <% types.forEach(function (t) { %>
+              <option value="<%= t %>" <%= t === tpl.tur ? 'selected' : '' %>><%= t %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1;min-width:200px">
+          <label for="g-ad">Belge Adı</label>
+          <input type="text" id="g-ad" name="ad" required value="<%= tpl.ad %>" />
+        </div>
+        <div class="form-group" style="flex:1;min-width:200px">
+          <label for="g-dosya">Yeni Dosya (.docx — isteğe bağlı)</label>
+          <input type="file" id="g-dosya" name="dosya" accept=".docx" />
+        </div>
+      </div>
+      <button type="submit" class="btn">Kaydet</button>
+    </form>
+  </div>
+
+  <div class="card card-danger">
+    <h3 style="margin-top:0">Belgeyi Sil</h3>
+    <p class="muted" style="font-size:13px">Belge öğrencilerin Belgeler sekmesinden kaldırılır; şablon dosyası da silinir. Bu işlem geri alınamaz.</p>
+    <form method="POST" action="/belge-yonetimi/<%= tpl.id %>/sil"
+          onsubmit="return confirm('<%= tpl.ad %> belgesini silmek istediğinize emin misiniz?');">
+      <button type="submit" class="btn btn-danger">Sil</button>
+    </form>
+  </div>
+</div>
+<%- include('partials/footer') %>

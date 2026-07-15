@@ -1,0 +1,10 @@
+<%- include('partials/head', { title: title }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <h1 class="page-title"><%= title %></h1>
+  <p class="page-sub">Bu bölüm bir sonraki geliştirme adımında eklenecek.</p>
+  <div class="card">
+    <p class="mb-0 muted">Giriş başarılı. Hoş geldiniz, <strong><%= user.full_name || user.email %></strong>.</p>
+  </div>
+</div>
+<%- include('partials/footer') %>

@@ -1,0 +1,20 @@
+<% const roleLabel = { admin: 'Admin', coordinator: 'Koordinatör', user: 'Kullanıcı' }; %>
+<div class="topbar">
+  <a class="brand" href="<%= currentUser ? homeUrl : '/giris' %>"
+     style="text-decoration:none;color:inherit">
+    <span class="logo-box"><img src="/public/img/logo.png" alt="KOSTÜ" /></span>
+    <span>Erasmus Belge Yönetim Sistemi</span>
+  </a>
+  <% if (currentUser) { %>
+  <div class="user-area">
+    <span class="role-badge"><%= roleLabel[currentUser.role] || currentUser.role %></span>
+    <span><%= currentUser.full_name || currentUser.email %></span>
+    <% if (currentUser.role === 'user') { %>
+      <a class="nav-btn" href="/belgeler">📄 Belgeler</a>
+    <% } else { %>
+      <a class="nav-btn" href="/belge-yonetimi">📄 Belge Yönetimi</a>
+    <% } %>
+    <a class="logout" href="/cikis">Çıkış Yap</a>
+  </div>
+  <% } %>
+</div>

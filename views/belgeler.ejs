@@ -1,0 +1,30 @@
+<%- include('partials/head', { title: 'Belgeler' }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <div class="flex-between" style="margin-bottom:14px">
+    <a href="<%= homeUrl %>" class="btn btn-sm btn-outline">← Geri</a>
+  </div>
+
+  <h1 class="page-title">Belgeler</h1>
+  <p class="page-sub">Hareketlilik türünüze ait belgeleri doldurup indirebilirsiniz.</p>
+
+  <% if (!docs.length) { %>
+    <div class="card text-center muted">Sizin için tanımlı bir belge bulunmuyor.</div>
+  <% } %>
+
+  <div class="grid">
+    <% docs.forEach(function (d) { %>
+      <a class="card" style="margin-bottom:0;text-decoration:none;color:inherit" href="/belgeler/<%= d.id %>">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div class="module-icon" style="margin-bottom:0;flex-shrink:0">📄</div>
+          <div style="min-width:0">
+            <h3 style="margin:0 0 4px"><%= d.ad %></h3>
+            <p class="muted" style="margin:0;font-size:13px"><%= d.tur %></p>
+          </div>
+        </div>
+        <div style="margin-top:14px"><span class="btn btn-sm">Doldur ve İndir →</span></div>
+      </a>
+    <% }); %>
+  </div>
+</div>
+<%- include('partials/footer') %>

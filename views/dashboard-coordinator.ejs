@@ -1,0 +1,24 @@
+<%- include('partials/head', { title: 'Koordinatör Paneli' }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <div class="flex-between" style="margin-bottom:6px">
+    <h1 class="page-title mb-0">Koordinatör Paneli</h1>
+    <div style="display:flex;gap:8px">
+      <a class="btn btn-koyu" href="/duyurular">📢 Duyurular</a>
+      <a class="btn btn-koyu" href="/belge-yonetimi">📄 Belge Yönetimi</a>
+      <a class="btn" href="/hareketlilik/yeni">➕ Yeni Hareketlilik Oluştur</a>
+    </div>
+  </div>
+  <p class="page-sub">Hoş geldiniz, <%= currentUser.full_name || currentUser.email %>. Oluşturduğunuz hareketlilikler aşağıda listelenir.</p>
+
+  <%- include('partials/stats-cards') %>
+
+  <%- include('partials/mobility-list') %>
+
+  <% if (pastMobilities && pastMobilities.length) { %>
+    <h2 class="page-title" style="font-size:18px;margin-top:28px">🗄️ Geçmiş Hareketlilikler</h2>
+    <p class="page-sub">Bitiş tarihi geçmiş hareketlilikler.</p>
+    <%- include('partials/mobility-list', { mobilities: pastMobilities }) %>
+  <% } %>
+</div>
+<%- include('partials/footer') %>

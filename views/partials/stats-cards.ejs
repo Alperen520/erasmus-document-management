@@ -1,0 +1,23 @@
+<%# Beklenen değişken: stats (globalStats çıktısı) %>
+<div class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-num"><%= stats.mobilityCount %></div>
+    <div class="stat-label">Hareketlilik</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num"><%= stats.userCount %></div>
+    <div class="stat-label">Kullanıcı</div>
+  </div>
+  <div class="stat-card bekliyor">
+    <div class="stat-num"><%= stats.pending %></div>
+    <div class="stat-label">Onay Bekleyen Belge</div>
+  </div>
+  <div class="stat-card onay">
+    <div class="stat-num"><%= stats.approved %></div>
+    <div class="stat-label">Onaylanan Belge</div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-num"><%= stats.rejected %></div>
+    <div class="stat-label">Reddedilen Belge</div>
+  </div>
+</div>

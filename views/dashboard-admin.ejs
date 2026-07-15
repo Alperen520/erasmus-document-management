@@ -1,0 +1,47 @@
+<%- include('partials/head', { title: 'Admin Paneli' }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <h1 class="page-title">Admin Paneli</h1>
+  <p class="page-sub">Hoş geldiniz, <%= currentUser.full_name || currentUser.email %>. Tüm yönetim işlemlerine buradan erişebilirsiniz.</p>
+
+  <%- include('partials/stats-cards') %>
+
+  <div class="grid" style="margin-bottom:24px">
+    <a class="module-card" href="/admin/koordinatorler">
+      <div class="module-icon">👥</div>
+      <h3>Koordinatör Yönetimi</h3>
+      <p>Koordinatör hesabı oluşturun ve yönetin.</p>
+    </a>
+    <a class="module-card" href="/hareketlilik/yeni">
+      <div class="module-icon">➕</div>
+      <h3>Yeni Hareketlilik</h3>
+      <p>Yeni bir hareketlilik oluşturun.</p>
+    </a>
+    <a class="module-card" href="/belge-yonetimi">
+      <div class="module-icon">📄</div>
+      <h3>Belge Yönetimi</h3>
+      <p>Otomatik doldurulan belge şablonlarını yönetin.</p>
+    </a>
+    <a class="module-card" href="/admin/kayitlar">
+      <div class="module-icon">📋</div>
+      <h3>İşlem Kayıtları</h3>
+      <p>Sistemdeki işlemlerin denetim kaydını inceleyin.</p>
+    </a>
+    <a class="module-card" href="/duyurular">
+      <div class="module-icon">📢</div>
+      <h3>Duyurular</h3>
+      <p>Kullanıcı panelinde görünecek duyuruları yönetin.</p>
+    </a>
+  </div>
+
+  <h2 class="page-title" id="tablolar" style="font-size:18px">Tüm Hareketlilikler</h2>
+  <p class="page-sub">Sistemdeki aktif hareketlilikler.</p>
+  <%- include('partials/mobility-list') %>
+
+  <% if (pastMobilities && pastMobilities.length) { %>
+    <h2 class="page-title" style="font-size:18px;margin-top:28px">🗄️ Geçmiş Hareketlilikler</h2>
+    <p class="page-sub">Bitiş tarihi geçmiş hareketlilikler.</p>
+    <%- include('partials/mobility-list', { mobilities: pastMobilities }) %>
+  <% } %>
+</div>
+<%- include('partials/footer') %>

@@ -1,0 +1,35 @@
+# Bağımlılıklar
+node_modules/
+
+# Ortam değişkenleri / gizli anahtarlar
+.env
+.env.*
+
+# Veritabanı (GERÇEK kişisel veri içerir — asla yüklenmez)
+erasmus.db
+erasmus.db-shm
+erasmus.db-wal
+*.sqlite
+*.sqlite3
+
+# Kullanıcıların yüklediği belgeler (GERÇEK kişisel veri — asla yüklenmez)
+uploads/*
+!uploads/.gitkeep
+
+# Loglar
+logs/*
+!logs/.gitkeep
+*.log
+
+# Belge şablonları (içlerinde gerçek kişi adları var — depoya yüklenmez)
+templates/*.docx
+!templates/.gitkeep
+
+# Yerel editör / araç ayarları
+.claude/
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+**/.DS_Store

@@ -1,0 +1,27 @@
+<%- include('partials/head', { title: 'Duyurular' }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <div class="flex-between" style="margin-bottom:14px">
+    <a href="<%= homeUrl %>" class="btn btn-sm btn-outline">← Geri</a>
+  </div>
+
+  <h1 class="page-title">📢 Duyurular</h1>
+  <p class="page-sub">Erasmus Koordinatörlüğü duyuruları.</p>
+
+  <% if (!rows.length) { %>
+    <div class="card text-center muted">Şu an duyuru bulunmuyor.</div>
+  <% } %>
+  <% rows.forEach(function (d) { %>
+    <div class="card duyuru-card">
+      <div style="font-weight:600;margin-bottom:4px"><%= d.baslik %>
+        <% if (d.yeni) { %><span class="duyuru-yeni">YENİ</span><% } %>
+      </div>
+      <div class="muted" style="font-size:12px;margin-bottom:8px">
+        <%= formatDateTR((d.created_at || '').slice(0, 10)) %>
+        <% if (d.tur) { %> · <span class="tag"><%= d.tur %></span><% } %>
+      </div>
+      <div style="font-size:14px;white-space:pre-line"><%= d.icerik %></div>
+    </div>
+  <% }); %>
+</div>
+<%- include('partials/footer') %>

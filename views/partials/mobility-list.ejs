@@ -1,0 +1,22 @@
+<%
+  // Beklenen değişkenler: mobilities (array), summaries (id->özet), mobilityTitle (fn)
+%>
+<% if (!mobilities || mobilities.length === 0) { %>
+  <div class="card text-center muted">Henüz hareketlilik bulunmuyor.</div>
+<% } else { %>
+  <% mobilities.forEach(function (m) { var s = summaries[m.id] || {}; %>
+    <a class="card flex-between" style="text-decoration:none;color:inherit"
+       href="/hareketlilik/<%= m.id %>">
+      <div>
+        <div style="font-weight:600;margin-bottom:6px"><%= mobilityTitle(m) %></div>
+        <div class="muted" style="font-size:13px">
+          <span class="tag"><%= s.userCount || 0 %> kullanıcı</span>
+          <span class="tag"><%= s.docCount || 0 %> belge</span>
+          <span class="count-pill"><%= s.approved || 0 %>/<%= s.total || 0 %> onaylandı</span>
+          <span class="tag">Belge yükleme: <%= formatDateTR(m.yukleme_baslangic) %> - <%= formatDateTR(m.yukleme_bitis) %></span>
+        </div>
+      </div>
+      <span class="btn btn-sm btn-outline">Tabloyu Aç →</span>
+    </a>
+  <% }); %>
+<% } %>

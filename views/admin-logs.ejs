@@ -1,0 +1,64 @@
+<%- include('partials/head', { title: 'İşlem Kayıtları' }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <div class="flex-between" style="margin-bottom:14px">
+    <a href="<%= homeUrl %>" class="btn btn-sm btn-outline">← Panel</a>
+  </div>
+
+  <h1 class="page-title">İşlem Kayıtları</h1>
+  <p class="page-sub">Sistemde yapılan işlemlerin denetim kaydı (toplam <%= total %> kayıt, en yeni üstte).</p>
+
+  <div class="card">
+    <form method="GET" action="/admin/kayitlar" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <div class="form-group" style="flex:1;min-width:220px;margin-bottom:0">
+        <label for="log-ara">Ara (e-posta, işlem veya detay)</label>
+        <input type="text" id="log-ara" name="ara" value="<%= ara %>" placeholder="örn. belge_onayla veya 220502034" />
+      </div>
+      <button type="submit" class="btn">Ara</button>
+      <% if (ara) { %><a class="btn btn-outline" href="/admin/kayitlar">Temizle</a><% } %>
+    </form>
+  </div>
+
+  <div class="card table-card">
+    <% if (!rows.length) { %>
+      <div class="text-center muted" style="padding:16px">Kayıt bulunamadı.</div>
+    <% } else { %>
+      <div class="table-scroll">
+        <table class="data" style="width:100%">
+          <thead>
+            <tr>
+              <th style="white-space:nowrap">Tarih</th>
+              <th>Kullanıcı</th>
+              <th>Rol</th>
+              <th>İşlem</th>
+              <th>Detay</th>
+              <th>IP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rows.forEach(function (r) { %>
+              <tr>
+                <td style="white-space:nowrap"><%= (r.created_at || '').replace('T', ' ').slice(0, 19) %></td>
+                <td><%= r.user_email || '-' %></td>
+                <td><%= r.role || '-' %></td>
+                <td><span class="tag"><%= r.islem %></span></td>
+                <td style="max-width:340px;overflow-wrap:anywhere"><%= r.detay || '' %></td>
+                <td><%= r.ip || '' %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="flex-between" style="margin-top:12px">
+    <% if (page > 1) { %>
+      <a class="btn btn-sm btn-outline" href="/admin/kayitlar?sayfa=<%= page - 1 %><%= ara ? '&ara=' + encodeURIComponent(ara) : '' %>">← Daha Yeni</a>
+    <% } else { %><span></span><% } %>
+    <% if (hasNext) { %>
+      <a class="btn btn-sm btn-outline" href="/admin/kayitlar?sayfa=<%= page + 1 %><%= ara ? '&ara=' + encodeURIComponent(ara) : '' %>">Daha Eski →</a>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/footer') %>

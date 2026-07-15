@@ -1,0 +1,309 @@
+<%- include('partials/head', { title: 'Hareketlilik Tablosu' }) %>
+<%- include('partials/topbar') %>
+<%
+  var showDivider = preDocs.length > 0 && normalDocs.length > 0;
+  var dividerMsg = 'Gitmeden önce belgelerini tamamlayıp onaylatmadan döndükten sonra adımına geçemezsiniz.';
+%>
+<div class="container wide">
+  <div class="flex-between" style="margin-bottom:14px">
+    <a href="<%= homeUrl %>" class="btn btn-sm btn-outline">← Geri</a>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="tag">
+        Belge yükleme: <%= formatDateTR(mobility.yukleme_baslangic) %> - <%= formatDateTR(mobility.yukleme_bitis) %>
+        <% if (uploadOpen) { %>(Açık)<% } else { %>(Kapalı)<% } %>
+      </span>
+      <% if (canManage) { %>
+        <a class="btn btn-sm btn-outline" href="/hareketlilik/<%= mobility.id %>/duzenle">✏️ Düzenle</a>
+        <button type="button" class="btn btn-sm btn-danger" id="sil-ac">🗑 Hareketliliği Sil</button>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="mobility-header"><%= mobilityTitle(mobility) %></div>
+
+  <% if (msg) { %><div class="alert alert-success"><%= msg %></div><% } %>
+  <% if (err) { %><div class="alert alert-error"><%= err %></div><% } %>
+  <% if (!canManage && !uploadOpen) { %>
+    <div class="alert alert-info">Belge yükleme dönemi <%= new Date().toISOString().slice(0,10) < mobility.yukleme_baslangic ? 'henüz başlamadı' : 'sona erdi' %>. Bu dönemde yeni belge yükleyemezsiniz.</div>
+  <% } %>
+
+  <% if (canManage) { %>
+  <div class="card table-card">
+    <div class="table-scroll">
+      <table class="data grouped">
+        <thead>
+          <%# 1. satır: grup başlıkları %>
+          <tr>
+            <th rowspan="2">Kullanıcı</th>
+            <% if (preDocs.length) { %>
+              <th colspan="<%= preDocs.length %>" class="grp grp-pre">Gitmeden Önce</th>
+            <% } %>
+            <% if (showDivider) { %>
+              <th rowspan="2" class="divider-head"></th>
+            <% } %>
+            <% if (normalDocs.length) { %>
+              <th colspan="<%= normalDocs.length %>" class="grp grp-normal">Döndükten Sonra</th>
+            <% } %>
+            <% if (canManage) { %>
+              <th rowspan="2" class="zip-col-head">Belgeler<br>(ZIP)</th>
+            <% } %>
+          </tr>
+          <%# 2. satır: belge adları + açıklama düzenleme %>
+          <tr>
+            <% function docHead(d) { %>
+              <th class="doc-head">
+                <div class="doc-head-name"><%- docNameHtml(d.ad) %></div>
+                <% if (d.aciklama) { %><div class="doc-aciklama-show"><%= d.aciklama %></div><% } %>
+                <form method="POST" action="/hareketlilik/<%= mobility.id %>/belge/<%= d.id %>/aciklama" class="doc-aciklama-form">
+                  <textarea name="aciklama" rows="5" placeholder="Açıklama yazın..."><%= d.aciklama || '' %></textarea>
+                  <button type="submit" class="btn btn-sm">Kaydet</button>
+                </form>
+              </th>
+            <% } %>
+            <% preDocs.forEach(docHead); %>
+            <% normalDocs.forEach(docHead); %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (users.length === 0) { %>
+            <tr><td colspan="<%= documents.length + (showDivider ? 2 : 1) + (canManage ? 1 : 0) %>" class="muted text-center">Kullanıcı yok.</td></tr>
+          <% } %>
+          <% users.forEach(function (u, ui) { var preOk = preApprovedByUser[u.id]; %>
+            <tr>
+              <td><%= u.full_name || u.email %></td>
+
+              <%# Zorunlu belgeler (her zaman erişilebilir) %>
+              <% preDocs.forEach(function (d) { var sub = (subMap[u.id] || {})[d.id]; %>
+                <td><%- include('partials/doc-cell', { sub: sub, d: d, u: u, locked: false }) %></td>
+              <% }); %>
+
+              <%# Dikey ayraç + uyarı (ilk satırda tüm satırları kaplar) %>
+              <% if (showDivider && ui === 0) { %>
+                <td class="divider-cell" rowspan="<%= users.length %>">
+                  <div class="divider-text"><%= dividerMsg %></div>
+                </td>
+              <% } %>
+
+              <%# Ön onay gerekmeyen belgeler (kullanıcı için kilitli olabilir) %>
+              <% normalDocs.forEach(function (d) { var sub = (subMap[u.id] || {})[d.id];
+                   var locked = !canManage && !preOk; %>
+                <td><%- include('partials/doc-cell', { sub: sub, d: d, u: u, locked: locked }) %></td>
+              <% }); %>
+
+              <%# ZIP indir — yalnız koordinatör/admin; tüm belgeler onaylıysa aktif %>
+              <% if (canManage) { %>
+                <td class="zip-cell">
+                  <% if (allApprovedByUser[u.id]) { %>
+                    <a class="btn btn-sm" href="/hareketlilik/<%= mobility.id %>/kullanici/<%= u.id %>/zip">⬇ ZIP indir</a>
+                  <% } else { %>
+                    <span class="muted" style="font-size:12px">Tüm belgeler onaylanınca</span>
+                  <% } %>
+                </td>
+              <% } %>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } else { %>
+  <%# ---- ÖĞRENCİ GÖRÜNÜMÜ: belgeler satır, durum sütun (transpoze) ---- %>
+  <div class="card table-card">
+    <div class="table-scroll">
+      <table class="data ogrenci-tablo">
+        <thead>
+          <tr><th>Belge</th><th>Açıklamalar</th><th>Durum</th></tr>
+        </thead>
+        <tbody>
+          <% var u = users[0]; var preOk = u ? preApprovedByUser[u.id] : false; %>
+          <% if (!u) { %>
+            <tr><td colspan="3" class="muted text-center">Kayıt bulunamadı.</td></tr>
+          <% } %>
+          <% if (u && preDocs.length) { %>
+            <tr><td colspan="3" class="grp-row grp-pre">Gitmeden Önce</td></tr>
+            <% preDocs.forEach(function (d) { var sub = (subMap[u.id] || {})[d.id]; %>
+              <tr>
+                <td class="doc-name-cell"><%- docNameHtml(d.ad) %></td>
+                <td class="doc-aciklama-cell"><%= d.aciklama || '' %></td>
+                <td><%- include('partials/doc-cell', { sub: sub, d: d, u: u, locked: false }) %></td>
+              </tr>
+            <% }); %>
+          <% } %>
+          <% if (u && showDivider) { %>
+            <tr><td colspan="3" class="divider-row"><%= dividerMsg %></td></tr>
+          <% } %>
+          <% if (u && normalDocs.length) { %>
+            <tr><td colspan="3" class="grp-row grp-normal">Döndükten Sonra</td></tr>
+            <% normalDocs.forEach(function (d) { var sub = (subMap[u.id] || {})[d.id]; var locked = !preOk; %>
+              <tr>
+                <td class="doc-name-cell"><%- docNameHtml(d.ad) %></td>
+                <td class="doc-aciklama-cell"><%= d.aciklama || '' %></td>
+                <td><%- include('partials/doc-cell', { sub: sub, d: d, u: u, locked: locked }) %></td>
+              </tr>
+            <% }); %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+<% if (canManage) { %>
+<div class="modal-overlay" id="sil-modal" hidden>
+  <div class="modal">
+    <h3>Hareketliliği Sil</h3>
+    <p>Bu hareketlilik ve ilgili tüm belgeler/yüklemeler kalıcı olarak silinecek. Devam etmek istiyor musunuz?</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" id="sil-vazgec">Vazgeç</button>
+      <form method="POST" action="/hareketlilik/<%= mobility.id %>/sil">
+        <button type="submit" class="btn btn-danger">Evet, Sil</button>
+      </form>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<script>
+  // Tablo kaydırma konumunu yenilemeler arasında koru (onayla/reddet sonrası
+  // en sola/başa zıplamayı engeller).
+  (function () {
+    var scroller = document.querySelector('.table-scroll');
+    var key = 'mobScroll_' + location.pathname;
+    function restore() {
+      try {
+        var s = JSON.parse(sessionStorage.getItem(key) || 'null');
+        if (!s) return;
+        if (scroller) scroller.scrollLeft = s.sl || 0;
+        window.scrollTo(s.wx || 0, s.wy || 0);
+      } catch (e) {}
+    }
+    function save() {
+      try {
+        sessionStorage.setItem(key, JSON.stringify({
+          sl: scroller ? scroller.scrollLeft : 0,
+          wx: window.scrollX || window.pageXOffset || 0,
+          wy: window.scrollY || window.pageYOffset || 0
+        }));
+      } catch (e) {}
+    }
+    restore();
+    window.addEventListener('load', restore);
+    window.addEventListener('beforeunload', save);
+  })();
+
+  (function () {
+    var ac = document.getElementById('sil-ac');
+    var modal = document.getElementById('sil-modal');
+    var vazgec = document.getElementById('sil-vazgec');
+    if (ac && modal) {
+      ac.addEventListener('click', function () { modal.hidden = false; });
+      vazgec.addEventListener('click', function () { modal.hidden = true; });
+      modal.addEventListener('click', function (e) { if (e.target === modal) modal.hidden = true; });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') modal.hidden = true; });
+    }
+  })();
+
+  document.querySelectorAll('.reddet-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var reason = prompt('Reddetme sebebini girin:', '');
+      if (reason === null) return;
+      var f = document.createElement('form');
+      f.method = 'POST';
+      f.action = '/hareketlilik/' + b.dataset.mob + '/inceleme';
+      f.innerHTML =
+        '<input type="hidden" name="submissionId" value="' + b.dataset.sub + '">' +
+        '<input type="hidden" name="action" value="reddet">';
+      var r = document.createElement('input');
+      r.type = 'hidden'; r.name = 'reason'; r.value = reason;
+      f.appendChild(r);
+      document.body.appendChild(f);
+      f.submit();
+    });
+  });
+
+  // Açıklama kaydetme — AJAX: sayfa yenilenmez, diğer kutulardaki yazılmış metinler silinmez.
+  document.querySelectorAll('.doc-aciklama-form').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var btn = f.querySelector('button[type="submit"]');
+      var ta = f.querySelector('textarea');
+      var orig = btn ? btn.textContent : 'Kaydet';
+      if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor...'; }
+      fetch(f.action, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'aciklama=' + encodeURIComponent(ta ? ta.value : '')
+      })
+        .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+        .then(function (d) {
+          if (!d.ok) throw new Error('Kaydedilemedi');
+          if (btn) { btn.disabled = false; btn.textContent = 'Kaydedildi ✓'; setTimeout(function () { btn.textContent = orig; }, 1500); }
+        })
+        .catch(function () {
+          if (btn) { btn.disabled = false; btn.textContent = orig; }
+          alert('Açıklama kaydedilemedi.');
+        });
+    });
+  });
+
+  // Dekont silme — iki adımlı onay (tema içi, native confirm yok)
+  document.querySelectorAll('.sil-belge-form').forEach(function (f) {
+    var ac = f.querySelector('.sil-belge-ac');
+    var onay = f.querySelector('.sil-belge-onay');
+    var vaz = f.querySelector('.sil-belge-vazgec');
+    if (!ac || !onay) return;
+    ac.addEventListener('click', function () { ac.hidden = true; onay.hidden = false; });
+    if (vaz) vaz.addEventListener('click', function () { onay.hidden = true; ac.hidden = false; });
+  });
+
+  // Belge yükleme — AJAX: sayfa yenilenmez, konum ve diğer dosya seçimleri korunur.
+  document.querySelectorAll('form.upload-form').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var td = f.closest('td');
+      var btn = f.querySelector('button[type="submit"]');
+      var fileInput = f.querySelector('input[type="file"]');
+      if (!fileInput || !fileInput.files.length) return;
+      var origLabel = btn ? btn.textContent.trim() : 'Yükle';
+      if (btn) { btn.disabled = true; btn.textContent = 'Yükleniyor...'; }
+
+      fetch(f.action, {
+        method: 'POST',
+        body: new FormData(f),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+        .then(function (r) {
+          return r.json().catch(function () { return { ok: false, error: 'Beklenmeyen yanıt' }; });
+        })
+        .then(function (d) {
+          if (!d.ok) throw new Error(d.error || 'Yükleme başarısız');
+          var cell = td.querySelector('.cell');
+          if (cell) { cell.className = 'cell bekliyor'; cell.textContent = '⏳ İncelemede'; }
+          var wrap = td.querySelector('.belge-link-wrap');
+          var link = td.querySelector('.belge-link');
+          if (wrap) wrap.style.display = '';
+          if (link && d.fileUrl) link.href = d.fileUrl;
+          var rr = td.querySelector('.reject-reason');
+          if (rr) rr.remove();
+          if (btn) { btn.disabled = false; btn.textContent = 'Yeniden Yükle'; }
+          fileInput.value = '';
+          if (btn) {
+            var ok = document.createElement('span');
+            ok.textContent = ' ✓ Yüklendi';
+            ok.style.cssText = 'color:#2e7d32;font-size:12px;font-weight:600;margin-left:6px';
+            btn.insertAdjacentElement('afterend', ok);
+            setTimeout(function () { ok.remove(); }, 2500);
+          }
+        })
+        .catch(function (err) {
+          if (btn) { btn.disabled = false; btn.textContent = origLabel; }
+          alert('Yükleme hatası: ' + err.message);
+        });
+    });
+  });
+</script>
+<%- include('partials/footer') %>

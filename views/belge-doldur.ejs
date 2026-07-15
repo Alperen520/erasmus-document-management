@@ -1,0 +1,32 @@
+<%- include('partials/head', { title: tpl.ad }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <div class="flex-between" style="margin-bottom:14px">
+    <a href="/belgeler" class="btn btn-sm btn-outline">← Belgeler</a>
+  </div>
+
+  <h1 class="page-title"><%= tpl.ad %></h1>
+  <p class="page-sub"><%= tpl.tur %> — Aşağıdaki alanları doldurun; belge otomatik hazırlanıp inecektir.</p>
+
+  <% if (!fields.length) { %>
+    <div class="alert alert-info">Bu belgede doldurulacak alan bulunamadı; yine de indirebilirsiniz.</div>
+  <% } %>
+
+  <form method="POST" action="/belgeler/<%= tpl.id %>" class="card">
+    <% var pf = (typeof prefill !== 'undefined' && prefill) || {}; %>
+    <% fields.forEach(function (label, i) { %>
+      <div class="form-group">
+        <label for="alan_<%= i %>"><%= label %>
+          <% if (pf[label]) { %><span class="muted" style="font-weight:400;font-size:12px"> (otomatik dolduruldu, düzenleyebilirsiniz)</span><% } %>
+        </label>
+        <input type="text" id="alan_<%= i %>" name="alan_<%= i %>" autocomplete="off"
+               value="<%= pf[label] || '' %>" />
+      </div>
+    <% }); %>
+    <div class="flex-between" style="margin-top:8px">
+      <a href="/belgeler" class="btn btn-outline">İptal</a>
+      <button type="submit" class="btn">Doldur ve İndir</button>
+    </div>
+  </form>
+</div>
+<%- include('partials/footer') %>

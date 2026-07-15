@@ -1,0 +1,70 @@
+<!--
+  KOSTÜ Ana Panel — "Erasmus Belge Yönetim Sistemi" modül kartı.
+
+  Bu parçayı mevcut sistem panelindeki (http://37.148.212.101:1903/) diğer modül
+  kartlarının bulunduğu kapsayıcının (ör. .modules / .grid) içine ekleyin.
+
+  ÖNEMLİ:
+  1) href değerini modülün çalıştığı gerçek adres/portla değiştirin.
+     Geliştirmede:  http://localhost:1904
+     Sunucuda     :  http://37.148.212.101:<PORT>   (deploy sırasında belirlenecek)
+  2) Mevcut paneliniz kendi CSS sınıflarını kullanıyorsa (örn. .card, .module-box),
+     aşağıdaki sınıf adlarını panelinizdeki kart yapısına uyacak şekilde değiştirin.
+     İçeriği (başlık, ikon, açıklama) aynı bırakabilirsiniz.
+-->
+
+<!-- === SEÇENEK A: Kendi stiliyle gelen, bağımsız kart === -->
+<a class="erasmus-module-card" href="http://localhost:1904" target="_blank" rel="noopener">
+  <div class="erasmus-module-icon">
+    <!-- belge/dosya ikonu -->
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+      <polyline points="14 2 14 8 20 8"></polyline>
+      <line x1="9" y1="15" x2="15" y2="15"></line>
+      <polyline points="9 12 11 14 15 10"></polyline>
+    </svg>
+  </div>
+  <h3>Erasmus Belge Yönetim Sistemi</h3>
+  <p>Hareketlilik belgelerini yükleyin, onaylayın ve durumunu takip edin.</p>
+</a>
+
+<style>
+  .erasmus-module-card {
+    display: block;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+    text-decoration: none;
+    color: #2b2b2b;
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .erasmus-module-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10);
+  }
+  .erasmus-module-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: #1a5c3a;            /* koyu yeşil kare arka plan */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+  .erasmus-module-card h3 { margin: 0 0 6px; font-size: 16px; }
+  .erasmus-module-card p { margin: 0; color: #6b7280; font-size: 13px; }
+</style>
+
+
+<!-- === SEÇENEK B: Mevcut panelin kart sınıflarını kullanan sade sürüm ===
+     (Panelinizdeki kart sınıf adlarını .card / .card-icon ile değiştirin.)
+
+<a class="card" href="http://localhost:1904" target="_blank" rel="noopener">
+  <div class="card-icon" style="background:#1a5c3a;color:#fff;">📄</div>
+  <h3>Erasmus Belge Yönetim Sistemi</h3>
+  <p>Hareketlilik belgelerini yükleyin, onaylayın ve takip edin.</p>
+</a>
+-->

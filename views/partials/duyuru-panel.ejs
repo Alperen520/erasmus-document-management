@@ -1,0 +1,19 @@
+<%# Beklenen değişken: duyurular (en yeni önce, yeni bayraklı). Boşsa hiç görünmez. %>
+<% if (typeof duyurular !== 'undefined' && duyurular && duyurular.length) { %>
+  <div class="card duyuru-panel">
+    <div class="flex-between" style="margin-bottom:10px">
+      <h3 style="margin:0;font-size:16px">📢 Duyurular</h3>
+      <a href="/duyurular/tum" class="btn btn-sm btn-outline">Tümünü Gör</a>
+    </div>
+    <% duyurular.slice(0, 3).forEach(function (d, i) { %>
+      <div class="duyuru-item<%= i === Math.min(duyurular.length, 3) - 1 ? ' son' : '' %>">
+        <div style="font-weight:600;font-size:14px">
+          <%= d.baslik %>
+          <% if (d.yeni) { %><span class="duyuru-yeni">YENİ</span><% } %>
+        </div>
+        <div class="muted" style="font-size:12px;margin:2px 0 4px"><%= formatDateTR((d.created_at || '').slice(0, 10)) %></div>
+        <div style="font-size:13px;white-space:pre-line"><%= d.icerik %></div>
+      </div>
+    <% }); %>
+  </div>
+<% } %>

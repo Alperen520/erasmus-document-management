@@ -1,0 +1,67 @@
+<%- include('partials/head', { title: 'Hareketliliklerim' }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <h1 class="page-title">Hareketliliklerim</h1>
+  <p class="page-sub">Hoş geldiniz, <%= currentUser.full_name || currentUser.email %>. Size atanmış hareketlilikler ve belge durumlarınız aşağıdadır.</p>
+
+  <%- include('partials/duyuru-panel') %>
+
+  <%
+    function renderCard(m) {
+      var p = (typeof progress !== 'undefined' && progress[m.id]) || null;
+      var pct = p && p.total ? Math.round((p.approved / p.total) * 100) : 0;
+  %>
+      <a class="card flex-between" style="text-decoration:none;color:inherit"
+         href="/hareketlilik/<%= m.id %>">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;margin-bottom:6px"><%= mobilityTitle(m) %></div>
+          <div class="muted" style="font-size:13px">
+            <span class="tag">Belge yükleme: <%= formatDateTR(m.yukleme_baslangic) %> - <%= formatDateTR(m.yukleme_bitis) %></span>
+          </div>
+          <% if (p && p.total) { %>
+            <div class="progress-wrap"><div class="progress-bar" style="width:<%= pct %>%"></div></div>
+            <div class="progress-text">
+              <%= p.approved %>/<%= p.total %> belge onaylandı (%<%= pct %>)
+              <% if (p.missing > 0) { %> — <%= p.missing %> belge yüklenmedi<% } %>
+            </div>
+          <% } %>
+        </div>
+        <span class="btn btn-sm btn-outline" style="flex-shrink:0;margin-left:12px">Belgelerim →</span>
+      </a>
+  <% } %>
+
+  <% if ((!mobilities || mobilities.length === 0) && (!pastMobilities || pastMobilities.length === 0)) { %>
+    <div class="card text-center muted">Size atanmış bir hareketlilik bulunmuyor.</div>
+  <% } else { %>
+    <% (mobilities || []).forEach(function (m) { renderCard(m); }); %>
+
+    <% if (pastMobilities && pastMobilities.length) { %>
+      <h2 class="page-title" style="font-size:18px;margin-top:28px">🗄️ Geçmiş Hareketlilikler</h2>
+      <% pastMobilities.forEach(function (m) { renderCard(m); }); %>
+    <% } %>
+  <% } %>
+</div>
+
+<% if (!currentUser.full_name) { %>
+<div class="modal-overlay" id="adsoyad-modal">
+  <div class="modal">
+    <h3>Hoş geldiniz 👋</h3>
+    <p>Lütfen ad ve soyadınızı girin. Bu bilgi belge takip tablosunda isminiz olarak görünür.</p>
+    <form method="POST" action="/profil/ad-soyad">
+      <div class="form-group">
+        <label for="as-input">Adınız ve Soyadınız</label>
+        <input type="text" id="as-input" name="full_name" required
+               placeholder="Adınız (varsa ikinci adınız) Soyadınız" />
+      </div>
+      <div class="modal-actions">
+        <button type="submit" class="btn">Kaydet</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  (function () { var i = document.getElementById('as-input'); if (i) i.focus(); })();
+</script>
+<% } %>
+
+<%- include('partials/footer') %>

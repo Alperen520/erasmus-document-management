@@ -1,0 +1,89 @@
+<%
+  // Beklenen: sub, d (belge), u (kullanıcı), locked (bool)
+  // Locals'tan: mobility, canManage, uploadOpen
+  var status = (!sub || !sub.file_path) ? 'yok'
+    : sub.status === 'onaylandi' ? 'onaylandi'
+    : sub.status === 'reddedildi' ? 'reddedildi' : 'incelemede';
+  var disp = {
+    yok:        { cls: 'yuklenmedi', icon: '—',  text: 'Yüklenmedi' },
+    incelemede: { cls: 'bekliyor',   icon: '⏳', text: 'İncelemede' },
+    onaylandi:  { cls: 'onaylandi',  icon: '✓',  text: 'Onaylandı' },
+    reddedildi: { cls: 'reddedildi', icon: '✕',  text: 'Reddedildi' }
+  }[status];
+  // Hibe ödeme dekontu mu? (bu belgelerde yönetici de yükleyip silebilir)
+  var dekont = (typeof isDekont === 'function') && isDekont(d.ad);
+%>
+<% if (locked) { %>
+  <div class="cell locked">🔒 Kilitli</div>
+  <div class="muted" style="font-size:11px;margin-top:4px">Önce "Gitmeden Önce" belgeleri onaylanmalı</div>
+<% } else { %>
+  <div class="cell <%= disp.cls %>"><%= disp.icon %> <%= disp.text %></div>
+
+  <div class="belge-link-wrap" style="margin-top:6px<%= sub && sub.file_path ? '' : ';display:none' %>">
+    <a href="<%= sub && sub.file_path ? '/belge/' + sub.id : '#' %>" target="_blank" class="muted belge-link" style="font-size:12px">📎 Belgeyi Gör</a>
+  </div>
+
+  <% if (sub && sub.status === 'reddedildi' && sub.reject_reason) { %>
+    <div class="muted reject-reason" style="font-size:12px;margin-top:4px">Sebep: <%= sub.reject_reason %></div>
+  <% } %>
+
+  <%# Kullanıcı: yükleme %>
+  <% if (!canManage && uploadOpen && (!sub || sub.status !== 'onaylandi')) { %>
+    <form method="POST" action="/hareketlilik/<%= mobility.id %>/yukle"
+          enctype="multipart/form-data" style="margin-top:8px" class="upload-form">
+      <input type="hidden" name="documentId" value="<%= d.id %>" />
+      <input type="file" name="belge" accept=".pdf,.jpg,.jpeg,.png" required
+             style="font-size:12px;width:auto" />
+      <button type="submit" class="btn btn-sm" style="margin-top:6px">
+        <%= sub && sub.file_path ? 'Yeniden Yükle' : 'Yükle' %>
+      </button>
+    </form>
+  <% } %>
+
+  <%# Koordinatör/Admin: dekont belgelerine yükleme (dönem kısıtı yok, ilgili öğrenci için) %>
+  <% if (canManage && dekont && (!sub || sub.status !== 'onaylandi')) { %>
+    <form method="POST" action="/hareketlilik/<%= mobility.id %>/yukle"
+          enctype="multipart/form-data" style="margin-top:8px">
+      <input type="hidden" name="documentId" value="<%= d.id %>" />
+      <input type="hidden" name="userId" value="<%= u.id %>" />
+      <input type="file" name="belge" accept=".pdf,.jpg,.jpeg,.png" required
+             style="font-size:12px;width:auto" />
+      <button type="submit" class="btn btn-sm" style="margin-top:6px">
+        <%= sub && sub.file_path ? 'Yeniden Yükle' : 'Yükle' %>
+      </button>
+    </form>
+  <% } %>
+
+  <%# Dekont: silme — yalnız onaylanmamışken (incelemede/red/onay geri alındı) %>
+  <% if (dekont && sub && sub.file_path && sub.status !== 'onaylandi') { %>
+    <form method="POST" action="/hareketlilik/<%= mobility.id %>/belge-sil" class="sil-belge-form" style="margin-top:6px">
+      <input type="hidden" name="submissionId" value="<%= sub.id %>" />
+      <button type="button" class="btn btn-sm btn-danger sil-belge-ac">🗑 Sil</button>
+      <span class="sil-belge-onay" hidden>
+        <button type="submit" class="btn btn-sm btn-danger">Evet, Sil</button>
+        <button type="button" class="btn btn-sm btn-outline sil-belge-vazgec">Vazgeç</button>
+      </span>
+    </form>
+  <% } %>
+
+  <%# Koordinatör/Admin: onayla/reddet %>
+  <% if (canManage && sub && sub.file_path && sub.status !== 'onaylandi') { %>
+    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+      <form method="POST" action="/hareketlilik/<%= mobility.id %>/inceleme">
+        <input type="hidden" name="submissionId" value="<%= sub.id %>" />
+        <input type="hidden" name="action" value="onayla" />
+        <button type="submit" class="btn btn-sm">Onayla</button>
+      </form>
+      <button type="button" class="btn btn-sm btn-danger reddet-btn"
+              data-sub="<%= sub.id %>" data-mob="<%= mobility.id %>">Reddet</button>
+    </div>
+  <% } %>
+  <% if (canManage && sub && sub.status === 'onaylandi') { %>
+    <form method="POST" action="/hareketlilik/<%= mobility.id %>/inceleme" style="margin-top:6px">
+      <input type="hidden" name="submissionId" value="<%= sub.id %>" />
+      <input type="hidden" name="action" value="reddet" />
+      <input type="hidden" name="reason" value="Onay geri alındı" />
+      <button type="submit" class="btn btn-sm btn-outline">Onayı Geri Al</button>
+    </form>
+  <% } %>
+<% } %>

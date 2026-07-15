@@ -1,0 +1,70 @@
+<%- include('partials/head', { title: 'Giriş' }) %>
+<div class="login-wrap">
+  <div class="login-card">
+    <img class="login-logo-img" src="/public/img/logo.png" alt="KOSTÜ Logo" />
+    <h1 class="login-title">Erasmus Belge Yönetim Sistemi</h1>
+    <p class="login-sub">Hesabınıza giriş yapın</p>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <!-- Kullanıcı Girişi -->
+    <div id="form-kullanici" style="<%= mode === 'yonetici' ? 'display:none' : '' %>">
+      <form method="POST" action="/giris/kullanici">
+        <div class="form-group">
+          <label for="okulNo">Okul Numarası</label>
+          <div class="input-suffix">
+            <input type="text" id="okulNo" name="okulNo" placeholder="220502034"
+                   autocomplete="username" required />
+            <span class="suffix"><%= schoolDomain %></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="sifre">Şifre</label>
+          <input type="password" id="sifre" name="sifre" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-block">Giriş Yap</button>
+      </form>
+      <div class="login-switch">
+        <a href="#" id="link-yonetici">Yönetici Girişi</a>
+      </div>
+    </div>
+
+    <!-- Yönetici Girişi (Admin & Koordinatör) -->
+    <div id="form-yonetici" style="<%= mode === 'yonetici' ? '' : 'display:none' %>">
+      <form method="POST" action="/giris/yonetici">
+        <div class="form-group">
+          <label for="eposta">E-posta</label>
+          <div class="input-suffix">
+            <input type="text" id="eposta" name="eposta" placeholder="adiniz.soyadiniz"
+                   autocomplete="username" required />
+            <span class="suffix"><%= schoolDomain %></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ysifre">Şifre</label>
+          <input type="password" id="ysifre" name="sifre" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-koyu btn-block">Yönetici Girişi</button>
+      </form>
+      <div class="login-switch">
+        <a href="#" id="link-kullanici">← Kullanıcı Girişi</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('link-yonetici')?.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('form-kullanici').style.display = 'none';
+    document.getElementById('form-yonetici').style.display = '';
+  });
+  document.getElementById('link-kullanici')?.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('form-yonetici').style.display = 'none';
+    document.getElementById('form-kullanici').style.display = '';
+  });
+</script>
+<%- include('partials/footer') %>

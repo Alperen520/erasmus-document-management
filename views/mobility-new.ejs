@@ -1,0 +1,173 @@
+<% var isEdit = (typeof editId !== 'undefined') && editId; %>
+<%- include('partials/head', { title: isEdit ? 'Hareketlilik Düzenle' : 'Yeni Hareketlilik' }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <h1 class="page-title"><%= isEdit ? 'Hareketlilik Düzenle' : 'Yeni Hareketlilik Oluştur' %></h1>
+  <p class="page-sub">
+    <% if (isEdit) { %>
+      Bilgileri güncelleyin. Belge adını değiştirseniz bile o belgeye yapılmış yüklemeler korunur.
+    <% } else { %>
+      Hareketlilik bilgilerini doldurun. Kaydedince belge takip tablosu otomatik oluşturulur.
+    <% } %>
+  </p>
+
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+  <form method="POST" action="<%= isEdit ? '/hareketlilik/' + editId + '/duzenle' : '/hareketlilik/yeni' %>" class="card">
+    <div class="row">
+      <div class="form-group">
+        <label for="donem">Hareketlilik Dönemi <span class="muted">*</span></label>
+        <input type="text" id="donem" name="donem" placeholder="2025-2026"
+               value="<%= form.donem || '' %>" required />
+        <div class="hint">Akademik dönem (örn. 2025-2026)</div>
+      </div>
+      <div class="form-group">
+        <label for="tur">Hareketlilik Türü <span class="muted">*</span></label>
+        <select id="tur" name="tur" required>
+          <option value="">Seçiniz…</option>
+          <% types.forEach(function (t) { %>
+            <option value="<%= t %>" <%= form.tur === t ? 'selected' : '' %>><%= t %></option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
+
+    <fieldset style="border:1px solid var(--kenar);border-radius:8px;padding:14px;margin:0 0 16px">
+      <legend style="font-weight:600;font-size:14px;padding:0 6px">Hareketlilik Tarihleri</legend>
+      <div class="row">
+        <div class="form-group mb-0">
+          <label for="baslangic_tarih">Başlangıç <span class="muted">*</span></label>
+          <input type="date" id="baslangic_tarih" name="baslangic_tarih"
+                 value="<%= form.baslangic_tarih || '' %>" required />
+        </div>
+        <div class="form-group mb-0">
+          <label for="bitis_tarih">Bitiş <span class="muted">*</span></label>
+          <input type="date" id="bitis_tarih" name="bitis_tarih"
+                 value="<%= form.bitis_tarih || '' %>" required />
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset style="border:1px solid var(--kenar);border-radius:8px;padding:14px;margin:0 0 16px">
+      <legend style="font-weight:600;font-size:14px;padding:0 6px">Belge Yükleme Tarihleri</legend>
+      <div class="row">
+        <div class="form-group mb-0">
+          <label for="yukleme_baslangic">Başlangıç <span class="muted">*</span></label>
+          <input type="date" id="yukleme_baslangic" name="yukleme_baslangic"
+                 value="<%= form.yukleme_baslangic || '' %>" required />
+        </div>
+        <div class="form-group mb-0">
+          <label for="yukleme_bitis">Bitiş <span class="muted">*</span></label>
+          <input type="date" id="yukleme_bitis" name="yukleme_bitis"
+                 value="<%= form.yukleme_bitis || '' %>" required />
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="form-group">
+      <label for="kullanicilar">Kullanıcılar <span class="muted">*</span></label>
+      <textarea id="kullanicilar" name="kullanicilar" rows="3"
+                placeholder="220502034, 220502035, ahmet.yilmaz&#10;veya tam e-posta: ali@kocaelisaglik.edu.tr"><%= form.kullanicilar || '' %></textarea>
+      <div class="hint">
+        Virgül veya satır ile ayırın. Sadece okul numarası/kullanıcı adı yazarsanız sistem
+        otomatik olarak <strong><%= '@kocaelisaglik.edu.tr' %></strong> ekler.
+        <% if (isEdit) { %>Listeden çıkardığınız kişi hareketlilikten kaldırılır (yüklemeleri silinir).<% } %>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Gitmeden Önce <span class="muted">*</span></label>
+      <div class="hint" style="margin-bottom:8px">
+        Bu belgeler her kullanıcı için zorunludur. Hepsi onaylanmadan kullanıcı, aşağıdaki
+        "Döndükten Sonra" grubunu yükleyemez.
+      </div>
+      <div id="oncesi-listesi">
+        <% defaultPreDocs.forEach(function (d) { %>
+          <div class="belge-satir" style="display:flex;gap:8px;margin-bottom:8px">
+            <input type="hidden" name="belgelerOncesiId" value="<%= d.id || '' %>" />
+            <input type="text" name="belgelerOncesi" value="<%= d.ad %>" placeholder="Zorunlu belge adı" />
+            <button type="button" class="btn btn-sm btn-danger belge-sil">Sil</button>
+          </div>
+        <% }); %>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline" id="oncesi-ekle">＋ Zorunlu Belge Ekle</button>
+    </div>
+
+    <div class="form-group">
+      <label>Döndükten Sonra <span class="muted">*</span></label>
+      <div class="hint" style="margin-bottom:8px">
+        Dönüş sonrası belgeleri. Düzenleyin, silin veya yeni ekleyin.
+      </div>
+      <div id="belge-listesi">
+        <% defaultDocs.forEach(function (d) { %>
+          <div class="belge-satir" style="display:flex;gap:8px;margin-bottom:8px">
+            <input type="hidden" name="belgelerId" value="<%= d.id || '' %>" />
+            <input type="text" name="belgeler" value="<%= d.ad %>" placeholder="Belge adı" />
+            <button type="button" class="btn btn-sm btn-danger belge-sil">Sil</button>
+          </div>
+        <% }); %>
+      </div>
+      <button type="button" class="btn btn-sm btn-outline" id="belge-ekle">＋ Belge Ekle</button>
+    </div>
+
+    <div class="flex-between" style="margin-top:8px">
+      <a href="<%= isEdit ? '/hareketlilik/' + editId : homeUrl %>" class="btn btn-outline">İptal</a>
+      <button type="submit" class="btn"><%= isEdit ? 'Değişiklikleri Kaydet' : 'Hareketlilik Oluştur' %></button>
+    </div>
+  </form>
+</div>
+
+<script>
+  var IS_EDIT = <%= isEdit ? 'true' : 'false' %>;
+
+  // Belge satırı ekle / sil — iki liste için ortak (gizli id input'u boş gelir = yeni belge)
+  function belgeListesiKur(listeId, ekleId, idName, inputName, placeholder) {
+    document.getElementById(ekleId).addEventListener('click', function () {
+      var wrap = document.getElementById(listeId);
+      var row = document.createElement('div');
+      row.className = 'belge-satir';
+      row.style = 'display:flex;gap:8px;margin-bottom:8px';
+      row.innerHTML =
+        '<input type="hidden" name="' + idName + '" value="" />' +
+        '<input type="text" name="' + inputName + '" placeholder="' + placeholder + '" />' +
+        '<button type="button" class="btn btn-sm btn-danger belge-sil">Sil</button>';
+      wrap.appendChild(row);
+    });
+    document.getElementById(listeId).addEventListener('click', function (e) {
+      if (e.target.classList.contains('belge-sil')) e.target.closest('.belge-satir').remove();
+    });
+  }
+  belgeListesiKur('oncesi-listesi', 'oncesi-ekle', 'belgelerOncesiId', 'belgelerOncesi', 'Zorunlu belge adı');
+  belgeListesiKur('belge-listesi', 'belge-ekle', 'belgelerId', 'belgeler', 'Belge adı');
+
+  // Hareketlilik türüne göre belge listelerini otomatik doldur (yeni belgeler — id boş)
+  var TEMPLATES = <%- JSON.stringify(templates) %>;
+  var DEFAULT_TEMPLATE = <%- JSON.stringify(defaultTemplate) %>;
+
+  function listeyiDoldur(listeId, idName, inputName, placeholder, values) {
+    var wrap = document.getElementById(listeId);
+    wrap.innerHTML = '';
+    values.forEach(function (v) {
+      var row = document.createElement('div');
+      row.className = 'belge-satir';
+      row.style = 'display:flex;gap:8px;margin-bottom:8px';
+      row.innerHTML =
+        '<input type="hidden" name="' + idName + '" value="" />' +
+        '<input type="text" name="' + inputName + '" placeholder="' + placeholder + '" />' +
+        '<button type="button" class="btn btn-sm btn-danger belge-sil">Sil</button>';
+      row.querySelector('input[type="text"]').value = v;
+      wrap.appendChild(row);
+    });
+  }
+
+  document.getElementById('tur').addEventListener('change', function () {
+    // Düzenlemede tür değişince mevcut belgeleri ezmeden önce kullanıcıyı uyar
+    if (IS_EDIT && !confirm('Türü değiştirmek belge listesini o türün şablonuyla değiştirir; mevcut belge satırları (ve eşleşmeyenlerin yüklemeleri) gidebilir. Devam edilsin mi?')) {
+      return;
+    }
+    var tpl = TEMPLATES[this.value] || DEFAULT_TEMPLATE;
+    listeyiDoldur('oncesi-listesi', 'belgelerOncesiId', 'belgelerOncesi', 'Zorunlu belge adı', tpl.once || []);
+    listeyiDoldur('belge-listesi', 'belgelerId', 'belgeler', 'Belge adı', tpl.sonra || []);
+  });
+</script>
+<%- include('partials/footer') %>

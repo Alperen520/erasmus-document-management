@@ -1,0 +1,71 @@
+<%- include('partials/head', { title: 'Koordinatör Yönetimi' }) %>
+<%- include('partials/topbar') %>
+<div class="container">
+  <div class="flex-between" style="margin-bottom:6px">
+    <h1 class="page-title mb-0">Koordinatör Yönetimi</h1>
+    <a href="/admin" class="btn btn-sm btn-outline">← Admin Paneli</a>
+  </div>
+  <p class="page-sub">Yeni koordinatör hesabı oluşturun veya mevcutları yönetin.</p>
+
+  <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+  <% if (success) { %><div class="alert alert-success"><%= success %></div><% } %>
+
+  <div class="card">
+    <h2 class="page-title" style="font-size:16px">Yeni Koordinatör Ekle</h2>
+    <form method="POST" action="/admin/koordinatorler">
+      <div class="row">
+        <div class="form-group">
+          <label for="full_name">Ad Soyad <span class="muted">*</span></label>
+          <input type="text" id="full_name" name="full_name" value="<%= form.full_name || '' %>" required />
+        </div>
+        <div class="form-group">
+          <label for="eposta">E-posta <span class="muted">*</span></label>
+          <div class="input-suffix">
+            <input type="text" id="eposta" name="eposta"
+                   placeholder="koordinator.adi"
+                   value="<%= form.eposta || '' %>" required />
+            <span class="suffix"><%= schoolDomain %></span>
+          </div>
+          <div class="hint">Sadece kullanıcı adını yazın; uzantı otomatik eklenir. Tam e-posta da girebilirsiniz.</div>
+        </div>
+        <div class="form-group">
+          <label for="sifre">Şifre <span class="muted">*</span></label>
+          <input type="text" id="sifre" name="sifre" required />
+          <div class="hint">Şifreyi siz belirlersiniz (en az 6 karakter). Koordinatöre iletin.</div>
+        </div>
+      </div>
+      <button type="submit" class="btn">Koordinatör Oluştur</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 class="page-title" style="font-size:16px">Mevcut Koordinatörler</h2>
+    <% if (coordinators.length === 0) { %>
+      <p class="muted mb-0">Henüz koordinatör bulunmuyor.</p>
+    <% } else { %>
+      <div class="table-scroll">
+        <table class="data">
+          <thead>
+            <tr><th>Ad Soyad</th><th>E-posta</th><th>Oluşturulma</th><th style="width:90px">İşlem</th></tr>
+          </thead>
+          <tbody>
+            <% coordinators.forEach(function (c) { %>
+              <tr>
+                <td><%= c.full_name || '—' %></td>
+                <td><%= c.email %></td>
+                <td class="muted"><%= formatDateTR((c.created_at || '').slice(0,10)) %></td>
+                <td>
+                  <form method="POST" action="/admin/koordinatorler/<%= c.id %>/sil"
+                        onsubmit="return confirm('Bu koordinatörü silmek istediğinize emin misiniz?')">
+                    <button type="submit" class="btn btn-sm btn-danger">Sil</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/footer') %>
