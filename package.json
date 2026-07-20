@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "KOSTÜ Erasmus Belge Yönetim Sistemi",
   "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server.js",
     "seed": "node db/seed.js",
@@ -11,6 +14,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.3.0",
+    "dotenv": "^17.4.2",
     "ejs": "^3.1.10",
     "express": "^4.21.0",
     "express-session": "^1.18.0",

@@ -36,6 +36,8 @@ Built as a full-stack Node.js project with server-side rendering, role-based acc
 
 ### Getting Started
 
+**Prerequisites:** Node.js 18 or newer (`better-sqlite3` compiles a native module during install).
+
 ```bash
 # 1. Install dependencies
 npm install
@@ -118,6 +120,8 @@ Sunucu taraflı render, rol bazlı erişim kontrolü, güvenli dosya yükleme ve
 | Dosya yükleme | `multer` |
 
 ### Kurulum
+
+**Ön koşul:** Node.js 18 veya üzeri (`better-sqlite3` kurulum sırasında yerel bir modül derler).
 
 ```bash
 # 1. Bağımlılıkları yükleyin

@@ -4,6 +4,8 @@ node_modules/
 # Ortam değişkenleri / gizli anahtarlar
 .env
 .env.*
+# Örnek şablon gizli veri içermez — depoya dahil edilir.
+!.env.example
 
 # Veritabanı (GERÇEK kişisel veri içerir — asla yüklenmez)
 erasmus.db

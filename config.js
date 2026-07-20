@@ -1,3 +1,6 @@
+// .env dosyasını yükler (varsa). Yoksa aşağıdaki yedek değerler kullanılır.
+require('dotenv').config();
+
 // Merkezi yapılandırma — sonradan kolayca değiştirilebilir.
 //
 // BELGE GRUPLARI / KİLİT MANTIĞI:
